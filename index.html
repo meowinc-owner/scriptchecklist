@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Script Checklist - Meowinc Scripts</title>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+body {
+  font-family: 'Lexend', sans-serif;
+  background: #121212;
+  color: #e0e0e0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 50px 20px;
+  min-height: 100vh;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Animated dotted background */
+body::before {
+  content: "";
+  position: fixed;
+  top: -1000px;
+  left: -1000px;
+  width: 4000px;
+  height: 4000px;
+  background-image: radial-gradient(#555 1px, transparent 1px);
+  background-size: 20px 20px;
+  transform: rotate(-45deg);
+  animation: moveDots 20s linear infinite;
+  z-index: -1;
+  opacity: 0.15;
+}
+@keyframes moveDots {
+  from { transform: rotate(-45deg) translateX(0); }
+  to { transform: rotate(-45deg) translateX(-2000px); }
+}
+
+h1 {
+  margin-bottom: 30px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+#newItemContainer {
+  display: flex;
+  margin-bottom: 30px;
+}
+
+button#addItemBtn {
+  font-size: 28px;
+  padding: 0 24px;
+  border: none;
+  background: #4caf50;
+  color: white;
+  cursor: pointer;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  transition: background 0.3s, transform 0.2s, box-shadow 0.3s;
+}
+button#addItemBtn:hover {
+  background: #43a047;
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  max-width: 500px;
+}
+
+li {
+  position: relative;
+  background: #1e1e1e;
+  margin-bottom: 16px;
+  border-radius: 16px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  transition: transform 0.2s, box-shadow 0.3s, background 0.3s;
+}
+li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+}
+li.checked span {
+  text-decoration: line-through;
+  color: #999;
+  transition: color 0.3s;
+}
+
+input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  margin-right: 12px;
+  z-index: 2;
+  position: relative;
+  cursor: pointer;
+}
+
+span {
+  flex: 1;
+  cursor: pointer;
+  z-index: 2;
+  position: relative;
+  font-size: 18px;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 18px;
+  border-radius: 10px;
+  border: 1px solid #555;
+  outline: none;
+  background: #2c2c2c;
+  color: #e0e0e0;
+  z-index: 2;
+  position: relative;
+}
+
+/* Red overlay covers full li */
+.redOverlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 0;
+  height: 100%;
+  background: #ff1744;
+  border-radius: 16px;
+  z-index: 1;
+  transition: width 0.4s ease;
+}
+
+/* Right container for hover + X */
+.rightContainer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 140px; /* hover zone */
+  height: 100%;
+  cursor: pointer;
+  z-index: 3;
+}
+
+/* Remove button inside container */
+.rightContainer .removeBtn {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 4;
+  background: none;
+  border: none;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  opacity: 0;
+  cursor: pointer;
+  transition: opacity 0.3s;
+}
+
+/* Hover triggers overlay and fade-in X */
+.rightContainer:hover ~ .redOverlay {
+  width: 100%;
+}
+.rightContainer:hover .removeBtn {
+  opacity: 1;
+}
+</style>
+</head>
+<body>
+
+<h1>Script To-Do List - Meowinc Scripts</h1>
+<div id="newItemContainer">
+  <button id="addItemBtn">+</button>
+</div>
+<ul id="checklist"></ul>
+
+<script>
+const checklist = document.getElementById('checklist');
+const addItemBtn = document.getElementById('addItemBtn');
+
+function saveItems() {
+  const items = [];
+  checklist.querySelectorAll('li').forEach(li => {
+    const text = li.querySelector('span').textContent;
+    const checked = li.querySelector('input[type="checkbox"]').checked;
+    items.push({ text, checked });
+  });
+  localStorage.setItem('checklistItems', JSON.stringify(items));
+}
+
+function createItem(text='New Item', checked=false) {
+  const li = document.createElement('li');
+
+  // Checkbox
+  const checkbox = document.createElement('input');
+  checkbox.type = 'checkbox';
+  checkbox.checked = checked;
+  checkbox.addEventListener('change', () => {
+    li.classList.toggle('checked', checkbox.checked);
+    saveItems();
+  });
+  li.appendChild(checkbox);
+
+  // Editable span
+  const span = document.createElement('span');
+  span.textContent = text;
+  li.appendChild(span);
+  span.addEventListener('click', () => {
+    if(li.querySelector('input[type="text"]')) return;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.value = span.textContent;
+    li.replaceChild(input, span);
+    input.focus();
+    input.addEventListener('blur', () => {
+      span.textContent = input.value || 'New Item';
+      li.replaceChild(span, input);
+      saveItems();
+    });
+    input.addEventListener('keypress', e => { if(e.key==='Enter') input.blur(); });
+  });
+
+  // Right container (hover + X)
+  const rightContainer = document.createElement('div');
+  rightContainer.className = 'rightContainer';
+
+  const removeBtn = document.createElement('button');
+  removeBtn.textContent = 'X';
+  removeBtn.className = 'removeBtn';
+  removeBtn.addEventListener('click', () => {
+    li.remove();
+    saveItems();
+  });
+  rightContainer.appendChild(removeBtn);
+  li.appendChild(rightContainer);
+
+  // Red overlay (full li, must be last for ~ selector)
+  const redOverlay = document.createElement('div');
+  redOverlay.className = 'redOverlay';
+  li.appendChild(redOverlay);
+
+  if(checked) li.classList.add('checked');
+  checklist.appendChild(li);
+}
+
+// Add new item
+addItemBtn.addEventListener('click', () => {
+  createItem();
+  saveItems();
+});
+
+// Load saved items
+const savedItems = JSON.parse(localStorage.getItem('checklistItems') || '[]');
+savedItems.forEach(item => createItem(item.text, item.checked));
+</script>
+
+</body>
+</html>
