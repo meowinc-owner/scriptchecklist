@@ -27,14 +27,13 @@ body::before {
   left: -1000px;
   width: 4000px;
   height: 4000px;
-  background-image: radial-gradient(#555 3px, transparent 3px);
-  background-size: 40px 40px;
+  background-image: radial-gradient(#555 1px, transparent 1px);
+  background-size: 20px 20px;
   transform: rotate(-45deg);
   animation: moveDots 20s linear infinite;
   z-index: -1;
   opacity: 0.15;
 }
-
 @keyframes moveDots {
   from { transform: rotate(-45deg) translateX(0); }
   to { transform: rotate(-45deg) translateX(-2000px); }
